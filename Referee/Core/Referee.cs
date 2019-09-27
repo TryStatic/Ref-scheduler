@@ -4,8 +4,8 @@ namespace Referee.Core
 {
     public class Referee
     {
-        public string name;
         public List<Team> blocks;
+        public string name;
 
         public Referee()
         {

@@ -11,15 +11,15 @@ namespace Referee.UI
         public EditFields()
         {
             InitializeComponent();
-            this.CenterToParent();
+            CenterToParent();
         }
 
         private void btnEditFieldsReturn_Click(object sender, EventArgs e)
         {
-            this.Hide();
-            ApplicationEntryPoint aep = new ApplicationEntryPoint();
+            Hide();
+            var aep = new ApplicationEntryPoint();
             aep.ShowDialog();
-            this.Close();
+            Close();
         }
 
         private void EditFields_Load(object sender, EventArgs e)
@@ -45,7 +45,7 @@ namespace Referee.UI
                 where !row.IsNewRow
                 select row.Cells[0].Value.ToString()
                 into fieldName
-                select new Field { fieldName = fieldName }).ToList();
+                select new Field {fieldName = fieldName}).ToList();
 
             ApplicationData.Fields.Clear();
 
@@ -59,7 +59,7 @@ namespace Referee.UI
             fieldData.Rows.Clear();
             foreach (var field in ApplicationData.Fields)
             {
-                var row = (DataGridViewRow)fieldData.Rows[0].Clone();
+                var row = (DataGridViewRow) fieldData.Rows[0].Clone();
                 row.Cells[0].Value = field.fieldName;
                 fieldData.Rows.Add(row);
             }

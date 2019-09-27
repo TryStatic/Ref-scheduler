@@ -11,14 +11,14 @@ namespace Referee.UI
         public EditTeams()
         {
             InitializeComponent();
-            this.CenterToParent();
+            CenterToParent();
         }
 
         private void button4_Click(object sender, EventArgs e)
         {
-            this.Hide();
+            Hide();
             new ApplicationEntryPoint().ShowDialog();
-            this.Close();
+            Close();
         }
 
         private void EditTeams_Load(object sender, EventArgs e)
@@ -44,7 +44,7 @@ namespace Referee.UI
                 where !row.IsNewRow
                 select row.Cells[0].Value.ToString()
                 into teamName
-                select new Team { teamName = teamName }).ToList();
+                select new Team {teamName = teamName}).ToList();
 
             ApplicationData.Teams.Clear();
 
@@ -57,7 +57,7 @@ namespace Referee.UI
             teamData.Rows.Clear();
             foreach (var team in ApplicationData.Teams)
             {
-                var row = (DataGridViewRow)teamData.Rows[0].Clone();
+                var row = (DataGridViewRow) teamData.Rows[0].Clone();
                 row.Cells[0].Value = team.teamName;
                 teamData.Rows.Add(row);
             }

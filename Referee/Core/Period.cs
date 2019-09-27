@@ -4,10 +4,10 @@ namespace Referee.Core
 {
     public class Period
     {
-        public string periodos;
-        public string diorganwsi;
         public int agwnistiki;
         public List<Assignment> assignments;
+        public string diorganwsi;
+        public string periodos;
 
         public Period()
         {

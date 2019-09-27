@@ -2,7 +2,6 @@
 using System.Windows.Forms;
 using Referee.Core;
 using static Referee.UI.ApplicationEntryPoint;
-using Referee = Referee.Core.Referee;
 
 namespace Referee.UI
 {
@@ -14,10 +13,7 @@ namespace Referee.UI
         public EditRefBlocks()
         {
             InitializeComponent();
-            foreach (var i in ApplicationData.Teams)
-            {
-                refBlockTeamList.Items.Add(i.teamName);
-            }
+            foreach (var i in ApplicationData.Teams) refBlockTeamList.Items.Add(i.teamName);
 
             //this.CenterToParent();
         }
@@ -29,9 +25,9 @@ namespace Referee.UI
         // RETURN TO EDIT REF PAGE
         private void btnReturnToEditRefs_Click(object sender, EventArgs e)
         {
-            this.Hide();
+            Hide();
             EditReferees.editRefBlocksPage.Show();
-            this.Close();
+            Close();
         }
 
         private void EditRefBlocks_Shown(object sender, EventArgs e)
@@ -40,7 +36,6 @@ namespace Referee.UI
             SelectedReferee = GetSelectedRefereeAddress();
             if (SelectedReferee == null) MessageBox.Show("Error-13");
             ReloadBlockData();
-
         }
 
         private Core.Referee GetSelectedRefereeAddress()
@@ -64,33 +59,33 @@ namespace Referee.UI
         {
             foreach (DataGridViewRow row in blockData.Rows)
             {
-                if(row.IsNewRow) continue;
+                if (row.IsNewRow) continue;
 
-                string tBlockTeam = row.Cells[0].Value.ToString();
+                var tBlockTeam = row.Cells[0].Value.ToString();
 
-                bool found = false;
+                var found = false;
                 foreach (var j in SelectedReferee.blocks)
                     if (j.teamName == tBlockTeam)
                         found = true;
 
                 if (found) continue;
 
-                SelectedReferee.blocks.Add(new Team { teamName = tBlockTeam });
+                SelectedReferee.blocks.Add(new Team {teamName = tBlockTeam});
             }
+
             ApplicationData.SaveData();
         }
 
         private void blockData_UserDeletingRow(object sender, DataGridViewRowCancelEventArgs e)
         {
-            string blockTeamName = blockData.SelectedRows[0].Cells[0].Value.ToString();
-            foreach (Team i in SelectedReferee.blocks)
-            {
+            var blockTeamName = blockData.SelectedRows[0].Cells[0].Value.ToString();
+            foreach (var i in SelectedReferee.blocks)
                 if (i.teamName == blockTeamName)
                 {
                     SelectedReferee.blocks.Remove(i);
                     break;
                 }
-            }
+
             ApplicationData.SaveData();
         }
 
@@ -100,7 +95,7 @@ namespace Referee.UI
 
             foreach (var j in SelectedReferee.blocks)
             {
-                DataGridViewRow row = (DataGridViewRow)blockData.Rows[0].Clone();
+                var row = (DataGridViewRow) blockData.Rows[0].Clone();
                 row.Cells[0].Value = j.teamName;
                 blockData.Rows.Add(row);
             }
@@ -108,7 +103,6 @@ namespace Referee.UI
 
         private void labelRefName_Click(object sender, EventArgs e)
         {
-
         }
     }
 }

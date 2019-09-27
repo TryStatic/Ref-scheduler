@@ -1,9 +1,6 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Windows.Forms;
 using static Referee.UI.ApplicationEntryPoint;
-using Referee = Referee.Core.Referee;
 
 namespace Referee.UI
 {
@@ -15,7 +12,7 @@ namespace Referee.UI
         public EditReferees()
         {
             InitializeComponent();
-            this.CenterToParent();
+            CenterToParent();
             editRefBlocksPage = new EditRefBlocks();
             editReferees = this;
         }
@@ -31,24 +28,21 @@ namespace Referee.UI
             SaveRefereeData();
             EditRefBlocks.SelectedRefName = RefereeData.SelectedCells[0].Value.ToString();
             editRefBlocksPage.ShowDialog();
-
-
         }
 
         // Click ReturnToEntryPoint
         private void btnReturnToEntryPoint_Click(object sender, EventArgs e)
         {
-            this.Hide();
+            Hide();
             SaveRefereeData();
             new ApplicationEntryPoint().ShowDialog();
-            this.Close();
+            Close();
         }
 
         // EditReferee page loaded
         private void EditReferees_Load(object sender, EventArgs e)
         {
             ReloadRefereeData();
-
         }
 
         // Save Referees Button clicked.
@@ -56,13 +50,11 @@ namespace Referee.UI
         {
             SaveRefereeData();
             ReloadRefereeData();
-
         }
 
         // Custom: Save referee data
         public void SaveRefereeData()
         {
-
             // For each row in the grid
             foreach (DataGridViewRow row in RefereeData.Rows)
             {
@@ -70,20 +62,20 @@ namespace Referee.UI
                 if (row.IsNewRow) continue;
 
                 // Get the Referee written in the grid
-                string tRefName = row.Cells[0].Value.ToString();
+                var tRefName = row.Cells[0].Value.ToString();
 
                 // Check if he is already in the database
-                bool found = false;
+                var found = false;
                 foreach (var j in ApplicationData.Refs)
                     // Found in File Database
                     if (j.name == tRefName)
                         found = true;
-                
+
                 // We found them in the database therefore he exists so go to the next grid entry
                 if (found) continue;
 
                 // He's not in, so add him.
-                ApplicationData.AddRef(new Core.Referee { name = tRefName });
+                ApplicationData.AddRef(new Core.Referee {name = tRefName});
             }
 
             ApplicationData.SaveData();
@@ -95,7 +87,7 @@ namespace Referee.UI
             RefereeData.Rows.Clear();
             foreach (var i in ApplicationData.Refs)
             {
-                DataGridViewRow row = (DataGridViewRow)RefereeData.Rows[0].Clone();
+                var row = (DataGridViewRow) RefereeData.Rows[0].Clone();
                 row.Cells[0].Value = i.name;
                 RefereeData.Rows.Add(row);
             }
@@ -103,15 +95,14 @@ namespace Referee.UI
 
         private void RefereeData_UserDeletingRow(object sender, DataGridViewRowCancelEventArgs e)
         {
-            string name = RefereeData.SelectedRows[0].Cells[0].Value.ToString();
+            var name = RefereeData.SelectedRows[0].Cells[0].Value.ToString();
             foreach (var i in ApplicationData.Refs)
-            {
                 if (i.name == name)
                 {
                     ApplicationData.Refs.Remove(i);
                     break;
                 }
-            }
+
             ApplicationData.SaveData();
         }
     }

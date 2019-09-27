@@ -34,49 +34,51 @@ namespace Referee.UI
             if (!string.IsNullOrWhiteSpace(agwnistiki))
                 cbAgwnistiki.Text = agwnistiki;
 
-            this.CenterToScreen();
-
+            CenterToScreen();
         }
 
         private void btn_editTeams_Click(object sender, EventArgs e)
         {
-            this.Hide();
+            Hide();
             new EditTeams().ShowDialog();
-            this.Close();
+            Close();
         }
 
         private void btn_editReferee_Click(object sender, EventArgs e)
         {
-            this.Hide();
+            Hide();
             new EditReferees().ShowDialog();
-            this.Close();
+            Close();
         }
 
         private void btn_editPeriods_Click(object sender, EventArgs e)
         {
-            this.Hide();
+            Hide();
             new EditPeriods().ShowDialog();
-            this.Close();
+            Close();
         }
 
         private void btn_switchRefereeAssignment(object sender, EventArgs e)
         {
             if (cbAgonistikiPeriodos.SelectedItem == null)
             {
-                MessageBox.Show("Το πεδίο της ΑΓΩΝΙΣΤΙΚΗΣ ΠΕΡΙΟΔΟΥ δεν μπορεί να είναι κενό", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                MessageBox.Show("Το πεδίο της ΑΓΩΝΙΣΤΙΚΗΣ ΠΕΡΙΟΔΟΥ δεν μπορεί να είναι κενό", "Error",
+                    MessageBoxButtons.OK, MessageBoxIcon.Error);
                 return;
             }
 
             if (cbDiorganwsi.SelectedItem == null)
 
             {
-                MessageBox.Show("Το πεδίο της ΔΙΟΡΓΑΝΩΣΗΣ δεν μπορεί να είναι κενό", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                MessageBox.Show("Το πεδίο της ΔΙΟΡΓΑΝΩΣΗΣ δεν μπορεί να είναι κενό", "Error", MessageBoxButtons.OK,
+                    MessageBoxIcon.Error);
                 return;
             }
 
             if (cbAgwnistiki.SelectedItem == null)
             {
-                MessageBox.Show("Το πεδίο της ΑΓΩΝΙΣΤΙΚΗΣ δεν μπορεί να είναι κενό", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                MessageBox.Show("Το πεδίο της ΑΓΩΝΙΣΤΙΚΗΣ δεν μπορεί να είναι κενό", "Error", MessageBoxButtons.OK,
+                    MessageBoxIcon.Error);
                 return;
             }
 
@@ -84,24 +86,24 @@ namespace Referee.UI
             organization = cbDiorganwsi.Text;
             agwnistiki = cbAgwnistiki.Text;
 
-            this.Hide();
-            RefereeAssignment ep = new RefereeAssignment();
+            Hide();
+            var ep = new RefereeAssignment();
             ep.ShowDialog();
-            this.Close();
+            Close();
         }
 
         private void btnEditFields_Click(object sender, EventArgs e)
         {
-            this.Hide();
+            Hide();
             new EditFields().ShowDialog();
-            this.Close();
+            Close();
         }
-        
+
         private void editRefWatch_Click(object sender, EventArgs e)
         {
-            this.Hide();
+            Hide();
             new EditRefWatch().ShowDialog();
-            this.Close();
+            Close();
         }
     }
 }

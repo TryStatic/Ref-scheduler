@@ -1,11 +1,11 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Drawing;
 using System.Text.RegularExpressions;
 using System.Windows.Forms;
+using Microsoft.Office.Interop.Word;
 using Referee.Core;
 using static Referee.UI.ApplicationEntryPoint;
-using Word = Microsoft.Office.Interop.Word;
+using Field = Referee.Core.Field;
 
 
 namespace Referee.UI
@@ -17,49 +17,42 @@ namespace Referee.UI
         public RefereeAssignment()
         {
             InitializeComponent();
-            this.CenterToParent();
+            CenterToParent();
 
             // Set the current period.
             _currentPeriod = new Period();
             _currentPeriod.periodos = period;
             _currentPeriod.diorganwsi = organization;
             _currentPeriod.agwnistiki = int.Parse(Regex.Match(agwnistiki, @"\d+").Value);
-
         }
-
 
 
         private void button4_Click(object sender, EventArgs e)
         {
-            this.Hide();
-            ApplicationEntryPoint aep = new ApplicationEntryPoint();
+            Hide();
+            var aep = new ApplicationEntryPoint();
             aep.ShowDialog();
             colorTimer.Stop();
-            this.Close();
+            Close();
         }
 
         private void MatchRegime_CellEnter(object sender, DataGridViewCellEventArgs e)
         {
             MatchRegime.BeginEdit(true);
             //MatchRegime.Rows[0].Cells[4].Style.BackColor = Color.Red; // CELL BACKGROUND COLOR
-
-
         }
 
         private void MatchRegime_CellFormatting(object sender, DataGridViewCellFormattingEventArgs e)
         {
-
         }
 
         // Form activated
         private void RefereeAssignment_Activated(object sender, EventArgs e)
         {
-
         }
 
         private void RefereeAssignment_Load(object sender, EventArgs e)
         {
-
             // Decoration on the labels
             SetDecorationText();
             // Load the combobox teams/refs etc.
@@ -70,7 +63,6 @@ namespace Referee.UI
             ValidateLastAgwinstikiData();
             // Start Timer
             colorTimer.Start();
-
         }
 
         private void ValidateLastAgwinstikiData()
@@ -103,6 +95,7 @@ namespace Referee.UI
                             MessageBox.Show(
                                 "ΠΡΟΣΟΧΗ: ΔΕΝ ΕΧΕΙ ΠΕΡΑΣΤΕΙ Η (ΠΑΡΑ)-ΠΡΟΗΓΟΥΜΕΝΗ ΑΓΩΝΙΣΤΙΚΗ ΓΙΑ ΤΗΝ ΣΥΓΚΕΚΡΙΜΕΝΗ ΔΙΟΡΓΑΝΩΣΗ.");
                     }
+
                     break;
                 }
             }
@@ -116,7 +109,7 @@ namespace Referee.UI
                 MatchRegime.Rows.Clear();
                 foreach (var ass in i.assignments)
                 {
-                    DataGridViewRow row = (DataGridViewRow)MatchRegime.Rows[0].Clone();
+                    var row = (DataGridViewRow) MatchRegime.Rows[0].Clone();
                     row.Cells[0].Value = ass.home.teamName;
                     row.Cells[1].Value = ass.guest.teamName;
                     row.Cells[2].Value = ass.field.fieldName;
@@ -127,9 +120,11 @@ namespace Referee.UI
                     row.Cells[7].Value = ass.watchRef.name;
                     MatchRegime.Rows.Add(row);
                 }
+
                 break;
             }
-            CheckAllAssignmentRecordsForConflicts(false);
+
+            CheckAllAssignmentRecordsForConflicts();
         }
 
         // Save Button Clicked
@@ -150,21 +145,20 @@ namespace Referee.UI
             {
                 if (row.IsNewRow) continue;
 
-                Assignment newAss = new Assignment();
-                newAss.home = new Team() { teamName = row.Cells["hometeam"].Value.ToString() };
-                newAss.guest = new Team() { teamName = row.Cells["guestteam"].Value.ToString() };
-                newAss.field = new Field() { fieldName = row.Cells["field"].Value.ToString() };
+                var newAss = new Assignment();
+                newAss.home = new Team {teamName = row.Cells["hometeam"].Value.ToString()};
+                newAss.guest = new Team {teamName = row.Cells["guestteam"].Value.ToString()};
+                newAss.field = new Field {fieldName = row.Cells["field"].Value.ToString()};
                 newAss.time = row.Cells["time"].Value?.ToString() ?? "";
-                newAss.referee = new Core.Referee() { name = row.Cells["referee"].Value?.ToString() ?? "" };
-                newAss.helperA = new Core.Referee() { name = row.Cells["refereeHelperA"].Value?.ToString() ?? "" };
-                newAss.helperB = new Core.Referee() { name = row.Cells["refereeHelperB"].Value?.ToString() ?? "" };
-                newAss.watchRef = new Core.WatchRef() { name = row.Cells["refereeObserver"].Value?.ToString() ?? "" };
+                newAss.referee = new Core.Referee {name = row.Cells["referee"].Value?.ToString() ?? ""};
+                newAss.helperA = new Core.Referee {name = row.Cells["refereeHelperA"].Value?.ToString() ?? ""};
+                newAss.helperB = new Core.Referee {name = row.Cells["refereeHelperB"].Value?.ToString() ?? ""};
+                newAss.watchRef = new WatchRef {name = row.Cells["refereeObserver"].Value?.ToString() ?? ""};
                 _currentPeriod.assignments.Add(newAss);
             }
 
             // For each saved period
             foreach (var p in ApplicationData.Periods)
-            {
                 // If our period exists in the data
                 if (p.Equals(_currentPeriod))
                 {
@@ -173,7 +167,6 @@ namespace Referee.UI
                     ReloadAssignmentDataIntoGrid();
                     return;
                 }
-            }
 
             // Else just create it and add it to the data.
             ApplicationData.AddPeriod(_currentPeriod);
@@ -189,7 +182,6 @@ namespace Referee.UI
             refereeObserver.Items.Add("");
 
             foreach (var i in ApplicationData.Teams)
-            {
                 // TODO: This needs proper fixing.
                 switch (_currentPeriod.diorganwsi)
                 {
@@ -199,6 +191,7 @@ namespace Referee.UI
                             hometeam.Items.Add(i.teamName);
                             guestteam.Items.Add(i.teamName);
                         }
+
                         break;
                     case "Β\' Ερασιτεχνική":
                         if (i.teamName.Contains("Β\' Ερ"))
@@ -206,6 +199,7 @@ namespace Referee.UI
                             hometeam.Items.Add(i.teamName);
                             guestteam.Items.Add(i.teamName);
                         }
+
                         break;
                     case "Γ\' Ερασιτεχνική":
                         if (i.teamName.Contains("Γ\' Ερ"))
@@ -213,27 +207,20 @@ namespace Referee.UI
                             hometeam.Items.Add(i.teamName);
                             guestteam.Items.Add(i.teamName);
                         }
+
                         break;
                 }
-            }
 
-            foreach (var i in ApplicationData.Fields)
-            {
-                field.Items.Add(i.fieldName);
-            }
+            foreach (var i in ApplicationData.Fields) field.Items.Add(i.fieldName);
 
             foreach (var i in ApplicationData.Refs)
             {
                 referee.Items.Add(i.name);
                 refereeHelperA.Items.Add(i.name);
                 refereeHelperB.Items.Add(i.name);
-
             }
 
-            foreach (var i in ApplicationData.WatchRefs)
-            {
-                refereeObserver.Items.Add(i.name);
-            }
+            foreach (var i in ApplicationData.WatchRefs) refereeObserver.Items.Add(i.name);
         }
 
         private void SetDecorationText()
@@ -241,12 +228,10 @@ namespace Referee.UI
             labelPeriod.Text = period;
             labelOrganization.Text = organization;
             labelAgonistiki.Text = agwnistiki;
-
         }
 
         private void MatchRegime_CellEndEdit(object sender, DataGridViewCellEventArgs e)
         {
-
         }
 
         private void MatchRegime_EditingControlShowing(object sender, DataGridViewEditingControlShowingEventArgs e)
@@ -254,7 +239,7 @@ namespace Referee.UI
             var combo = e.Control as ComboBox;
             if (combo != null)
             {
-                combo.SelectedIndexChanged -= new EventHandler(combo_SelectedIndexChanged);
+                combo.SelectedIndexChanged -= combo_SelectedIndexChanged;
                 combo.SelectedIndexChanged += combo_SelectedIndexChanged;
             }
         }
@@ -264,7 +249,7 @@ namespace Referee.UI
             var combo = sender as ComboBox;
             if (combo == null) return;
 
-            string currentSelectedString = combo.SelectedItem.ToString();
+            var currentSelectedString = combo.SelectedItem.ToString();
             var currentColumn = MatchRegime.SelectedCells[0].ColumnIndex;
             var currentRow = MatchRegime.SelectedCells[0].RowIndex;
 
@@ -289,13 +274,13 @@ namespace Referee.UI
                     break;
                 case 7: // refObs
                     break;
-
             }
 
             //MessageBox.Show(currentColumn + "   " + currentRow);
         }
 
-        private bool ValidateRefereeData(string currentSelectedString, int currentColumn,int currentRow, bool showMessages = true)
+        private bool ValidateRefereeData(string currentSelectedString, int currentColumn, int currentRow,
+            bool showMessages = true)
         {
             if (string.IsNullOrWhiteSpace(currentSelectedString) ||
                 string.IsNullOrWhiteSpace(currentSelectedString)) return true;
@@ -304,20 +289,23 @@ namespace Referee.UI
             var myRef = ApplicationData.Refs.Find(x => x.name == currentSelectedString);
             foreach (var b in myRef.blocks)
             {
-                var myHomeTeam = GetDataGridStringValue((int)RegimeColumns.Home, currentRow);
-                var myGuestTeam = GetDataGridStringValue((int)RegimeColumns.Guest, currentRow);
+                var myHomeTeam = GetDataGridStringValue((int) RegimeColumns.Home, currentRow);
+                var myGuestTeam = GetDataGridStringValue((int) RegimeColumns.Guest, currentRow);
                 if (b.teamName == myHomeTeam)
                 {
-                    if(showMessages)
-                        MessageBox.Show($"Ο ΔΙΑΙΤΗΤΗΣ [{currentSelectedString}] ΔΕΝ ΜΠΟΡΕΙ ΝΑ ΟΡΙΣΤΕΙ ΣΤΟ ΣΥΓΚΕΚΡΙΜΕΝΟ ΑΓΩΝΑ ΔΙΟΤΙ ΕΧΕΙ ΚΩΛΥΜΑ ΜΕ ΤΗΝ ΟΜΑΔΑ:\n{myHomeTeam}.");
+                    if (showMessages)
+                        MessageBox.Show(
+                            $"Ο ΔΙΑΙΤΗΤΗΣ [{currentSelectedString}] ΔΕΝ ΜΠΟΡΕΙ ΝΑ ΟΡΙΣΤΕΙ ΣΤΟ ΣΥΓΚΕΚΡΙΜΕΝΟ ΑΓΩΝΑ ΔΙΟΤΙ ΕΧΕΙ ΚΩΛΥΜΑ ΜΕ ΤΗΝ ΟΜΑΔΑ:\n{myHomeTeam}.");
                     MatchRegime.Rows[currentRow].Cells[currentColumn].Style.BackColor = Color.Violet;
 
                     return false;
                 }
-                else if (b.teamName == myGuestTeam)
+
+                if (b.teamName == myGuestTeam)
                 {
                     if (showMessages)
-                        MessageBox.Show($"Ο ΔΙΑΙΤΗΤΗΣ [{currentSelectedString}] ΔΕΝ ΜΠΟΡΕΙ ΝΑ ΟΡΙΣΤΕΙ ΣΤΟ ΣΥΓΚΕΚΡΙΜΕΝΟ ΑΓΩΝΑ ΔΙΟΤΙ ΕΧΕΙ ΚΩΛΥΜΑ ΜΕ ΤΗΝ ΟΜΑΔΑ:\n{myGuestTeam}.");
+                        MessageBox.Show(
+                            $"Ο ΔΙΑΙΤΗΤΗΣ [{currentSelectedString}] ΔΕΝ ΜΠΟΡΕΙ ΝΑ ΟΡΙΣΤΕΙ ΣΤΟ ΣΥΓΚΕΚΡΙΜΕΝΟ ΑΓΩΝΑ ΔΙΟΤΙ ΕΧΕΙ ΚΩΛΥΜΑ ΜΕ ΤΗΝ ΟΜΑΔΑ:\n{myGuestTeam}.");
                     MatchRegime.Rows[currentRow].Cells[currentColumn].Style.BackColor = Color.Violet;
                     return false;
                 }
@@ -334,7 +322,8 @@ namespace Referee.UI
                     MatchRegime.Rows[currentRow].Cells[currentColumn].Style.BackColor = Color.Yellow;
                     return false;
                 }
-                else if (currentSelectedString.Equals(GetDataGridStringValue((int) RegimeColumns.RefhelpB, currentRow)))
+
+                if (currentSelectedString.Equals(GetDataGridStringValue((int) RegimeColumns.RefhelpB, currentRow)))
                 {
                     if (showMessages)
                         MessageBox.Show("Ο ΔΙΑΙΤΗΤΗΣ ΔΕΝ ΜΠΟΡΕΙ ΝΑ ΕΙΝΑΙ ΙΔΙΟΣ ΜΕ ΤΟΝ Β' ΒΟΗΘΟ ΔΙΑΙΤΗΤΗ.");
@@ -342,9 +331,9 @@ namespace Referee.UI
                     return false;
                 }
             }
-            else if (currentColumn == (int)RegimeColumns.RefhelpA)
+            else if (currentColumn == (int) RegimeColumns.RefhelpA)
             {
-                if (currentSelectedString.Equals(GetDataGridStringValue((int)RegimeColumns.Ref, currentRow)))
+                if (currentSelectedString.Equals(GetDataGridStringValue((int) RegimeColumns.Ref, currentRow)))
                 {
                     // Same name with RefA
                     if (showMessages)
@@ -352,7 +341,8 @@ namespace Referee.UI
                     MatchRegime.Rows[currentRow].Cells[currentColumn].Style.BackColor = Color.Yellow;
                     return false;
                 }
-                else if (currentSelectedString.Equals(GetDataGridStringValue((int)RegimeColumns.RefhelpB, currentRow)))
+
+                if (currentSelectedString.Equals(GetDataGridStringValue((int) RegimeColumns.RefhelpB, currentRow)))
                 {
                     if (showMessages)
                         MessageBox.Show("Α' ΒΟΗΘΟΣ ΔΕΝ ΜΠΟΡΕΙ ΝΑ ΕΙΝΑΙ ΙΔΙΟΣ ΜΕ ΤΟΝ Β' ΒΟΗΘΟ ΔΙΑΙΤΗΤΗ.");
@@ -360,9 +350,9 @@ namespace Referee.UI
                     return false;
                 }
             }
-            else if (currentColumn == (int)RegimeColumns.RefhelpB)
+            else if (currentColumn == (int) RegimeColumns.RefhelpB)
             {
-                if (currentSelectedString.Equals(GetDataGridStringValue((int)RegimeColumns.Ref, currentRow)))
+                if (currentSelectedString.Equals(GetDataGridStringValue((int) RegimeColumns.Ref, currentRow)))
                 {
                     // Same name with RefA
                     if (showMessages)
@@ -370,7 +360,8 @@ namespace Referee.UI
                     MatchRegime.Rows[currentRow].Cells[currentColumn].Style.BackColor = Color.Yellow;
                     return false;
                 }
-                else if (currentSelectedString.Equals(GetDataGridStringValue((int)RegimeColumns.RefhelpA, currentRow)))
+
+                if (currentSelectedString.Equals(GetDataGridStringValue((int) RegimeColumns.RefhelpA, currentRow)))
                 {
                     if (showMessages)
                         MessageBox.Show("Β' ΒΟΗΘΟΣ ΔΕΝ ΜΠΟΡΕΙ ΝΑ ΕΙΝΑΙ ΙΔΙΟΣ ΜΕ ΤΟΝ Α' ΒΟΗΘΟ ΔΙΑΙΤΗΤΗ.");
@@ -381,149 +372,180 @@ namespace Referee.UI
 
             // Other rows, all refs
             foreach (DataGridViewRow row in MatchRegime.Rows)
-            { // For each other row
+            {
+                // For each other row
                 if (row.Index == currentRow) continue;
                 if (row.IsNewRow) continue;
 
-                if (currentSelectedString.Equals(GetDataGridStringValue((int)RegimeColumns.Ref, row.Index)))
-                { // Ref same as ref
-                    var currHomeTeam = GetDataGridStringValue((int)RegimeColumns.Home, row.Index);
-                    var currVisitTeam = GetDataGridStringValue((int)RegimeColumns.Guest, row.Index);
+                if (currentSelectedString.Equals(GetDataGridStringValue((int) RegimeColumns.Ref, row.Index)))
+                {
+                    // Ref same as ref
+                    var currHomeTeam = GetDataGridStringValue((int) RegimeColumns.Home, row.Index);
+                    var currVisitTeam = GetDataGridStringValue((int) RegimeColumns.Guest, row.Index);
                     if (showMessages)
-                        MessageBox.Show(string.Format($"Ο ΔΙΑΙΤΗΤΗΣ [{currentSelectedString}] ΕΧΕΙ ΗΔΗ ΟΡΙΣΤΕΙ ΩΣ ΔΙΑΙΤΗΤΗΣ ΣΤΟΝ ΑΓΩΝΑ\n[{currHomeTeam}-{currVisitTeam}]\nΣΤΗΝ ΙΔΙΑ ΑΓΩΝΣΤΙΚΗ."));
+                        MessageBox.Show(string.Format(
+                            $"Ο ΔΙΑΙΤΗΤΗΣ [{currentSelectedString}] ΕΧΕΙ ΗΔΗ ΟΡΙΣΤΕΙ ΩΣ ΔΙΑΙΤΗΤΗΣ ΣΤΟΝ ΑΓΩΝΑ\n[{currHomeTeam}-{currVisitTeam}]\nΣΤΗΝ ΙΔΙΑ ΑΓΩΝΣΤΙΚΗ."));
                     MatchRegime.Rows[currentRow].Cells[currentColumn].Style.BackColor = Color.Aqua;
                     return false;
                 }
-                if (currentSelectedString.Equals(GetDataGridStringValue((int)RegimeColumns.RefhelpA, row.Index)))
-                { // Ref same as HelperA
-                    var currHomeTeam = GetDataGridStringValue((int)RegimeColumns.Home, row.Index);
-                    var currVisitTeam = GetDataGridStringValue((int)RegimeColumns.Guest, row.Index);
+
+                if (currentSelectedString.Equals(GetDataGridStringValue((int) RegimeColumns.RefhelpA, row.Index)))
+                {
+                    // Ref same as HelperA
+                    var currHomeTeam = GetDataGridStringValue((int) RegimeColumns.Home, row.Index);
+                    var currVisitTeam = GetDataGridStringValue((int) RegimeColumns.Guest, row.Index);
                     if (showMessages)
-                        MessageBox.Show(string.Format($"Ο ΔΙΑΙΤΗΤΗΣ [{currentSelectedString}] ΕΧΕΙ ΗΔΗ ΟΡΙΣΤΕΙ ΩΣ Α' ΒΟΗΘΟΣ ΔΙΑΙΤΗΤΗ ΣΤΟΝ ΑΓΩΝΑ\n[{currHomeTeam}-{currVisitTeam}]\nΣΤΗΝ ΙΔΙΑ ΑΓΩΝΣΤΙΚΗ."));
+                        MessageBox.Show(string.Format(
+                            $"Ο ΔΙΑΙΤΗΤΗΣ [{currentSelectedString}] ΕΧΕΙ ΗΔΗ ΟΡΙΣΤΕΙ ΩΣ Α' ΒΟΗΘΟΣ ΔΙΑΙΤΗΤΗ ΣΤΟΝ ΑΓΩΝΑ\n[{currHomeTeam}-{currVisitTeam}]\nΣΤΗΝ ΙΔΙΑ ΑΓΩΝΣΤΙΚΗ."));
                     MatchRegime.Rows[currentRow].Cells[currentColumn].Style.BackColor = Color.Aqua;
                     return false;
                 }
-                if (currentSelectedString.Equals(GetDataGridStringValue((int)RegimeColumns.RefhelpB, row.Index)))
-                { // Ref same as Helperb
-                    var currHomeTeam = GetDataGridStringValue((int)RegimeColumns.Home, row.Index);
-                    var currVisitTeam = GetDataGridStringValue((int)RegimeColumns.Guest, row.Index);
+
+                if (currentSelectedString.Equals(GetDataGridStringValue((int) RegimeColumns.RefhelpB, row.Index)))
+                {
+                    // Ref same as Helperb
+                    var currHomeTeam = GetDataGridStringValue((int) RegimeColumns.Home, row.Index);
+                    var currVisitTeam = GetDataGridStringValue((int) RegimeColumns.Guest, row.Index);
                     if (showMessages)
-                        MessageBox.Show(string.Format($"Ο ΔΙΑΙΤΗΤΗΣ [{currentSelectedString}] ΕΧΕΙ ΗΔΗ ΟΡΙΣΤΕΙ ΩΣ Β' ΒΟΗΘΟΣ ΔΙΑΙΤΗΤΗ ΣΤΟΝ ΑΓΩΝΑ\n[{currHomeTeam}-{currVisitTeam}]\nΣΤΗΝ ΙΔΙΑ ΑΓΩΝΣΤΙΚΗ."));
+                        MessageBox.Show(string.Format(
+                            $"Ο ΔΙΑΙΤΗΤΗΣ [{currentSelectedString}] ΕΧΕΙ ΗΔΗ ΟΡΙΣΤΕΙ ΩΣ Β' ΒΟΗΘΟΣ ΔΙΑΙΤΗΤΗ ΣΤΟΝ ΑΓΩΝΑ\n[{currHomeTeam}-{currVisitTeam}]\nΣΤΗΝ ΙΔΙΑ ΑΓΩΝΣΤΙΚΗ."));
                     MatchRegime.Rows[currentRow].Cells[currentColumn].Style.BackColor = Color.Aqua;
                     return false;
                 }
             }
 
-            var currentRowTeamHome = GetDataGridStringValue((int)RegimeColumns.Home, currentRow);
-            var currentRowTeamGuest = GetDataGridStringValue((int)RegimeColumns.Guest, currentRow);
+            var currentRowTeamHome = GetDataGridStringValue((int) RegimeColumns.Home, currentRow);
+            var currentRowTeamGuest = GetDataGridStringValue((int) RegimeColumns.Guest, currentRow);
 
             var myPeriod = ApplicationData.GetLastPeriod(_currentPeriod);
             if (myPeriod != null)
-            {
                 foreach (var ass in myPeriod.assignments)
                 {
                     var currHomeTeam = ass.home.teamName;
                     var currVisitTeam = ass.guest.teamName;
                     if (
                         ass.referee.name == currentSelectedString && // Same Name
-                        ((ass.home.teamName == currentRowTeamHome || ass.home.teamName == currentRowTeamGuest) || // That home team either same with our home or guest
-                        (ass.guest.teamName == currentRowTeamHome || ass.guest.teamName == currentRowTeamGuest)) // That guest team either same with our home or guest
-                       )
+                        (ass.home.teamName == currentRowTeamHome || ass.home.teamName == currentRowTeamGuest ||
+                         ass.guest.teamName == currentRowTeamHome ||
+                         ass.guest.teamName == currentRowTeamGuest
+                        ) // That guest team either same with our home or guest
+                    )
                     {
-
-                        if (GetDataGridStringValue((int)RegimeColumns.Home, currentRow) == currHomeTeam || GetDataGridStringValue((int)RegimeColumns.Home, currentRow) == currVisitTeam ||
-                            GetDataGridStringValue((int)RegimeColumns.Guest, currentRow) == currHomeTeam || GetDataGridStringValue((int)RegimeColumns.Guest, currentRow) == currVisitTeam)
+                        if (GetDataGridStringValue((int) RegimeColumns.Home, currentRow) == currHomeTeam ||
+                            GetDataGridStringValue((int) RegimeColumns.Home, currentRow) == currVisitTeam ||
+                            GetDataGridStringValue((int) RegimeColumns.Guest, currentRow) == currHomeTeam ||
+                            GetDataGridStringValue((int) RegimeColumns.Guest, currentRow) == currVisitTeam)
                         {
                             if (showMessages)
-                                MessageBox.Show(string.Format($"Ο ΔΙΑΙΤΗΤΗΣ [{currentSelectedString}] ΕΙΧΕ ΟΡΙΣΤΕΙ ΩΣ ΔΙΑΙΤΗΤΗΣ ΣΤΟΝ ΑΓΩΝΑ\n[{currHomeTeam}-{currVisitTeam}]\nΣΤΗΝ ΣΤΗΝ ΠΡΟΗΓΟΥΜΕΝΗ ({myPeriod.agwnistiki}ή) ΑΓΩΝΙΣΤΙΚΗ."));
+                                MessageBox.Show(string.Format(
+                                    $"Ο ΔΙΑΙΤΗΤΗΣ [{currentSelectedString}] ΕΙΧΕ ΟΡΙΣΤΕΙ ΩΣ ΔΙΑΙΤΗΤΗΣ ΣΤΟΝ ΑΓΩΝΑ\n[{currHomeTeam}-{currVisitTeam}]\nΣΤΗΝ ΣΤΗΝ ΠΡΟΗΓΟΥΜΕΝΗ ({myPeriod.agwnistiki}ή) ΑΓΩΝΙΣΤΙΚΗ."));
                             MatchRegime.Rows[currentRow].Cells[currentColumn].Style.BackColor = Color.Red;
                             MatchRegime.Rows[currentRow].Cells[currentColumn].Style.SelectionBackColor = Color.Red;
                             return false;
                         }
-
                     }
                     else if (
                         ass.helperA.name == currentSelectedString && // Same Name
-                        ((ass.home.teamName == currentRowTeamHome || ass.home.teamName == currentRowTeamGuest) || // That home team either same with our home or guest
-                        (ass.guest.teamName == currentRowTeamHome || ass.guest.teamName == currentRowTeamGuest)) // That guest team either same with our home or guest
+                        (ass.home.teamName == currentRowTeamHome || ass.home.teamName == currentRowTeamGuest ||
+                         ass.guest.teamName == currentRowTeamHome ||
+                         ass.guest.teamName == currentRowTeamGuest
+                        ) // That guest team either same with our home or guest
                     )
                     {
-                        if (GetDataGridStringValue((int)RegimeColumns.Home, currentRow) == currHomeTeam || GetDataGridStringValue((int)RegimeColumns.Home, currentRow) == currVisitTeam ||
-                            GetDataGridStringValue((int)RegimeColumns.Guest, currentRow) == currHomeTeam || GetDataGridStringValue((int)RegimeColumns.Guest, currentRow) == currVisitTeam)
+                        if (GetDataGridStringValue((int) RegimeColumns.Home, currentRow) == currHomeTeam ||
+                            GetDataGridStringValue((int) RegimeColumns.Home, currentRow) == currVisitTeam ||
+                            GetDataGridStringValue((int) RegimeColumns.Guest, currentRow) == currHomeTeam ||
+                            GetDataGridStringValue((int) RegimeColumns.Guest, currentRow) == currVisitTeam)
                         {
                             if (showMessages)
-                                MessageBox.Show(string.Format($"Ο ΔΙΑΙΤΗΤΗΣ [{currentSelectedString}] ΕΙΧΕ ΟΡΙΣΤΕΙ ΩΣ Α' ΒΟΗΘΟΣ ΔΙΑΙΤΗΤΗΣ ΣΤΟΝ ΑΓΩΝΑ\n[{currHomeTeam}-{currVisitTeam}]\nΣΤΗΝ ΣΤΗΝ ΠΡΟΗΓΟΥΜΕΝΗ ({myPeriod.agwnistiki}ή) ΑΓΩΝΙΣΤΙΚΗ."));
+                                MessageBox.Show(string.Format(
+                                    $"Ο ΔΙΑΙΤΗΤΗΣ [{currentSelectedString}] ΕΙΧΕ ΟΡΙΣΤΕΙ ΩΣ Α' ΒΟΗΘΟΣ ΔΙΑΙΤΗΤΗΣ ΣΤΟΝ ΑΓΩΝΑ\n[{currHomeTeam}-{currVisitTeam}]\nΣΤΗΝ ΣΤΗΝ ΠΡΟΗΓΟΥΜΕΝΗ ({myPeriod.agwnistiki}ή) ΑΓΩΝΙΣΤΙΚΗ."));
                             MatchRegime.Rows[currentRow].Cells[currentColumn].Style.BackColor = Color.Red;
                             MatchRegime.Rows[currentRow].Cells[currentColumn].Style.SelectionBackColor = Color.Red;
                             return false;
                         }
-
                     }
                     else if (
                         ass.helperB.name == currentSelectedString && // Same Name
-                        ((ass.home.teamName == currentRowTeamHome || ass.home.teamName == currentRowTeamGuest) || // That home team either same with our home or guest
-                        (ass.guest.teamName == currentRowTeamHome || ass.guest.teamName == currentRowTeamGuest)) // That guest team either same with our home or guest
+                        (ass.home.teamName == currentRowTeamHome || ass.home.teamName == currentRowTeamGuest ||
+                         ass.guest.teamName == currentRowTeamHome ||
+                         ass.guest.teamName == currentRowTeamGuest
+                        ) // That guest team either same with our home or guest
                     )
                     {
-                        if (GetDataGridStringValue((int)RegimeColumns.Home, currentRow) == currHomeTeam || GetDataGridStringValue((int)RegimeColumns.Home, currentRow) == currVisitTeam ||
-                            GetDataGridStringValue((int)RegimeColumns.Guest, currentRow) == currHomeTeam || GetDataGridStringValue((int)RegimeColumns.Guest, currentRow) == currVisitTeam)
+                        if (GetDataGridStringValue((int) RegimeColumns.Home, currentRow) == currHomeTeam ||
+                            GetDataGridStringValue((int) RegimeColumns.Home, currentRow) == currVisitTeam ||
+                            GetDataGridStringValue((int) RegimeColumns.Guest, currentRow) == currHomeTeam ||
+                            GetDataGridStringValue((int) RegimeColumns.Guest, currentRow) == currVisitTeam)
                         {
                             if (showMessages)
-                                MessageBox.Show(string.Format($"Ο ΔΙΑΙΤΗΤΗΣ [{currentSelectedString}] ΕΙΧΕ ΟΡΙΣΤΕΙ ΩΣ B' ΒΟΗΘΟΣ ΔΙΑΙΤΗΤΗΣ ΣΤΟΝ ΑΓΩΝΑ\n[{currHomeTeam}-{currVisitTeam}]\nΣΤΗΝ ΣΤΗΝ ΠΡΟΗΓΟΥΜΕΝΗ ({myPeriod.agwnistiki}ή) ΑΓΩΝΙΣΤΙΚΗ."));
+                                MessageBox.Show(string.Format(
+                                    $"Ο ΔΙΑΙΤΗΤΗΣ [{currentSelectedString}] ΕΙΧΕ ΟΡΙΣΤΕΙ ΩΣ B' ΒΟΗΘΟΣ ΔΙΑΙΤΗΤΗΣ ΣΤΟΝ ΑΓΩΝΑ\n[{currHomeTeam}-{currVisitTeam}]\nΣΤΗΝ ΣΤΗΝ ΠΡΟΗΓΟΥΜΕΝΗ ({myPeriod.agwnistiki}ή) ΑΓΩΝΙΣΤΙΚΗ."));
                             MatchRegime.Rows[currentRow].Cells[currentColumn].Style.BackColor = Color.Red;
                             MatchRegime.Rows[currentRow].Cells[currentColumn].Style.SelectionBackColor = Color.Red;
                             return false;
                         }
-
                     }
                 }
-            }
 
             myPeriod = ApplicationData.GetSecondToLastPeriod(_currentPeriod);
             if (myPeriod != null)
-            {
                 foreach (var ass in myPeriod.assignments)
                 {
                     var currHomeTeam = ass.home.teamName;
                     var currVisitTeam = ass.guest.teamName;
                     if (
                         ass.referee.name == currentSelectedString && // Same Name
-                        ((ass.home.teamName == currentRowTeamHome || ass.home.teamName == currentRowTeamGuest) || // That home team either same with our home or guest
-                         (ass.guest.teamName == currentRowTeamHome || ass.guest.teamName == currentRowTeamGuest)) // That guest team either same with our home or guest
+                        (ass.home.teamName == currentRowTeamHome || ass.home.teamName == currentRowTeamGuest ||
+                         ass.guest.teamName == currentRowTeamHome ||
+                         ass.guest.teamName == currentRowTeamGuest
+                        ) // That guest team either same with our home or guest
                     )
                     {
                         if (showMessages)
-                            MessageBox.Show(string.Format($"Ο ΔΙΑΙΤΗΤΗΣ [{currentSelectedString}] ΕΙΧΕ ΟΡΙΣΤΕΙ ΩΣ ΔΙΑΙΤΗΤΗΣ ΣΤΟΝ ΑΓΩΝΑ\n[{currHomeTeam}-{currVisitTeam}]\nΣΤΗΝ ΣΤΗΝ (ΠΑΡΑ)ΠΡΟΗΓΟΥΜΕΝΗ {myPeriod.agwnistiki} ΑΓΩΝΙΣΤΙΚΗ."));
+                            MessageBox.Show(string.Format(
+                                $"Ο ΔΙΑΙΤΗΤΗΣ [{currentSelectedString}] ΕΙΧΕ ΟΡΙΣΤΕΙ ΩΣ ΔΙΑΙΤΗΤΗΣ ΣΤΟΝ ΑΓΩΝΑ\n[{currHomeTeam}-{currVisitTeam}]\nΣΤΗΝ ΣΤΗΝ (ΠΑΡΑ)ΠΡΟΗΓΟΥΜΕΝΗ {myPeriod.agwnistiki} ΑΓΩΝΙΣΤΙΚΗ."));
                         MatchRegime.Rows[currentRow].Cells[currentColumn].Style.BackColor = Color.MediumVioletRed;
-                        MatchRegime.Rows[currentRow].Cells[currentColumn].Style.SelectionBackColor = Color.MediumVioletRed;
+                        MatchRegime.Rows[currentRow].Cells[currentColumn].Style.SelectionBackColor =
+                            Color.MediumVioletRed;
                         return false;
                     }
-                    else if (
+
+                    if (
                         ass.helperA.name == currentSelectedString && // Same Name
-                        ((ass.home.teamName == currentRowTeamHome || ass.home.teamName == currentRowTeamGuest) || // That home team either same with our home or guest
-                         (ass.guest.teamName == currentRowTeamHome || ass.guest.teamName == currentRowTeamGuest)) // That guest team either same with our home or guest
+                        (ass.home.teamName == currentRowTeamHome || ass.home.teamName == currentRowTeamGuest ||
+                         ass.guest.teamName == currentRowTeamHome ||
+                         ass.guest.teamName == currentRowTeamGuest
+                        ) // That guest team either same with our home or guest
                     )
                     {
                         if (showMessages)
-                            MessageBox.Show(string.Format($"Ο ΔΙΑΙΤΗΤΗΣ [{currentSelectedString}] ΕΙΧΕ ΟΡΙΣΤΕΙ ΩΣ Α' ΒΟΗΘΟΣ ΔΙΑΙΤΗΤΗΣ ΣΤΟΝ ΑΓΩΝΑ\n[{currHomeTeam}-{currVisitTeam}]\nΣΤΗΝ ΣΤΗΝ (ΠΑΡΑ)ΠΡΟΗΓΟΥΜΕΝΗ {myPeriod.agwnistiki} ΑΓΩΝΙΣΤΙΚΗ."));
+                            MessageBox.Show(string.Format(
+                                $"Ο ΔΙΑΙΤΗΤΗΣ [{currentSelectedString}] ΕΙΧΕ ΟΡΙΣΤΕΙ ΩΣ Α' ΒΟΗΘΟΣ ΔΙΑΙΤΗΤΗΣ ΣΤΟΝ ΑΓΩΝΑ\n[{currHomeTeam}-{currVisitTeam}]\nΣΤΗΝ ΣΤΗΝ (ΠΑΡΑ)ΠΡΟΗΓΟΥΜΕΝΗ {myPeriod.agwnistiki} ΑΓΩΝΙΣΤΙΚΗ."));
                         MatchRegime.Rows[currentRow].Cells[currentColumn].Style.BackColor = Color.MediumVioletRed;
-                        MatchRegime.Rows[currentRow].Cells[currentColumn].Style.SelectionBackColor = Color.MediumVioletRed;
+                        MatchRegime.Rows[currentRow].Cells[currentColumn].Style.SelectionBackColor =
+                            Color.MediumVioletRed;
                         return false;
                     }
-                    else if (
+
+                    if (
                         ass.helperB.name == currentSelectedString && // Same Name
-                        ((ass.home.teamName == currentRowTeamHome || ass.home.teamName == currentRowTeamGuest) || // That home team either same with our home or guest
-                         (ass.guest.teamName == currentRowTeamHome || ass.guest.teamName == currentRowTeamGuest)) // That guest team either same with our home or guest
+                        (ass.home.teamName == currentRowTeamHome || ass.home.teamName == currentRowTeamGuest ||
+                         ass.guest.teamName == currentRowTeamHome ||
+                         ass.guest.teamName == currentRowTeamGuest
+                        ) // That guest team either same with our home or guest
                     )
                     {
                         if (showMessages)
-                            MessageBox.Show(string.Format($"Ο ΔΙΑΙΤΗΤΗΣ [{currentSelectedString}] ΕΙΧΕ ΟΡΙΣΤΕΙ ΩΣ B' ΒΟΗΘΟΣ ΔΙΑΙΤΗΤΗΣ ΣΤΟΝ ΑΓΩΝΑ\n[{currHomeTeam}-{currVisitTeam}]\nΣΤΗΝ ΣΤΗΝ (ΠΑΡΑ)ΠΡΟΗΓΟΥΜΕΝΗ {myPeriod.agwnistiki} ΑΓΩΝΙΣΤΙΚΗ."));
+                            MessageBox.Show(string.Format(
+                                $"Ο ΔΙΑΙΤΗΤΗΣ [{currentSelectedString}] ΕΙΧΕ ΟΡΙΣΤΕΙ ΩΣ B' ΒΟΗΘΟΣ ΔΙΑΙΤΗΤΗΣ ΣΤΟΝ ΑΓΩΝΑ\n[{currHomeTeam}-{currVisitTeam}]\nΣΤΗΝ ΣΤΗΝ (ΠΑΡΑ)ΠΡΟΗΓΟΥΜΕΝΗ {myPeriod.agwnistiki} ΑΓΩΝΙΣΤΙΚΗ."));
                         MatchRegime.Rows[currentRow].Cells[currentColumn].Style.BackColor = Color.MediumVioletRed;
-                        MatchRegime.Rows[currentRow].Cells[currentColumn].Style.SelectionBackColor = Color.MediumVioletRed;
+                        MatchRegime.Rows[currentRow].Cells[currentColumn].Style.SelectionBackColor =
+                            Color.MediumVioletRed;
                         return false;
                     }
                 }
-            }
+
             MatchRegime.Rows[currentRow].Cells[currentColumn].Style.BackColor = Color.White;
             MatchRegime.Rows[currentRow].Cells[currentColumn].Style.SelectionBackColor = Color.White;
             return true;
@@ -536,63 +558,52 @@ namespace Referee.UI
 
         private void btnExportToWord_Click(object sender, EventArgs e)
         {
-
             Export_Data_To_Word(MatchRegime);
-
         }
 
         public void Export_Data_To_Word(DataGridView DGV)
         {
             if (DGV.Rows.Count != 0)
             {
-                int RowCount = DGV.Rows.Count;
-                int ColumnCount = DGV.Columns.Count;
-                Object[,] DataArray = new object[RowCount + 1, ColumnCount + 1];
+                var RowCount = DGV.Rows.Count;
+                var ColumnCount = DGV.Columns.Count;
+                var DataArray = new object[RowCount + 1, ColumnCount + 1];
 
                 //add rows
-                int r = 0;
-                for (int c = 0; c <= ColumnCount - 1; c++)
-                {
-                    for (r = 0; r <= RowCount - 1; r++)
-                    {
-                        DataArray[r, c] = DGV.Rows[r].Cells[c].Value;
-                    } //end row loop
-                } //end column loop
+                var r = 0;
+                for (var c = 0; c <= ColumnCount - 1; c++)
+                for (r = 0; r <= RowCount - 1; r++)
+                    DataArray[r, c] = DGV.Rows[r].Cells[c].Value;
 
-                Word.Document oDoc = new Word.Document();
+                var oDoc = new Document();
                 oDoc.Application.Visible = true;
 
                 //page orintation
-                oDoc.PageSetup.Orientation = Word.WdOrientation.wdOrientLandscape;
+                oDoc.PageSetup.Orientation = WdOrientation.wdOrientLandscape;
                 oDoc.PageSetup.TopMargin = oDoc.Application.InchesToPoints(0.15f);
                 oDoc.PageSetup.LeftMargin = oDoc.Application.InchesToPoints(0.35f);
                 oDoc.PageSetup.BottomMargin = oDoc.Application.InchesToPoints(0.15f);
                 oDoc.PageSetup.RightMargin = oDoc.Application.InchesToPoints(0.35f);
 
                 dynamic oRange = oDoc.Content.Application.Selection.Range;
-                string oTemp = "";
+                var oTemp = "";
                 for (r = 0; r <= RowCount - 1; r++)
-                {
-                    for (int c = 0; c <= ColumnCount - 1; c++)
-                    {
-                        oTemp = oTemp + DataArray[r, c] + "\t";
-
-                    }
-                }
+                for (var c = 0; c <= ColumnCount - 1; c++)
+                    oTemp = oTemp + DataArray[r, c] + "\t";
 
                 //table format
                 oRange.Text = oTemp;
 
-                object Separator = Word.WdTableFieldSeparator.wdSeparateByTabs;
+                object Separator = WdTableFieldSeparator.wdSeparateByTabs;
                 object ApplyBorders = true;
                 object AutoFit = true;
-                object AutoFitBehavior = Word.WdAutoFitBehavior.wdAutoFitContent;
+                object AutoFitBehavior = WdAutoFitBehavior.wdAutoFitContent;
 
                 oRange.ConvertToTable(ref Separator, ref RowCount, ref ColumnCount,
-                                      Type.Missing, Type.Missing, ref ApplyBorders,
-                                      Type.Missing, Type.Missing, Type.Missing,
-                                      Type.Missing, Type.Missing, Type.Missing,
-                                      Type.Missing, ref AutoFit, ref AutoFitBehavior, Type.Missing);
+                    Type.Missing, Type.Missing, ref ApplyBorders,
+                    Type.Missing, Type.Missing, Type.Missing,
+                    Type.Missing, Type.Missing, Type.Missing,
+                    Type.Missing, ref AutoFit, ref AutoFitBehavior, Type.Missing);
 
                 oRange.Select();
 
@@ -609,10 +620,8 @@ namespace Referee.UI
                 oDoc.Application.Selection.Tables[1].Rows[1].Range.Font.Size = 8;
 
                 //add header row manually
-                for (int c = 0; c <= ColumnCount - 1; c++)
-                {
+                for (var c = 0; c <= ColumnCount - 1; c++)
                     oDoc.Application.Selection.Tables[1].Cell(1, c + 1).Range.Text = DGV.Columns[c].HeaderText;
-                }
 
 
                 //table style 
@@ -631,15 +640,12 @@ namespace Referee.UI
 
                 range.Font.Name = "Arial";
                 range.Font.Size = 8;*/
-
             }
         }
 
-        
 
         private void MatchRegime_DataError(object sender, DataGridViewDataErrorEventArgs e)
         {
-
         }
 
         private void btnCheckAll_Click(object sender, EventArgs e)
@@ -649,18 +655,18 @@ namespace Referee.UI
 
         private void CheckAllAssignmentRecordsForConflicts(bool showMessages = false)
         {
-            int errors = 0;
-            int checks = 0;
+            var errors = 0;
+            var checks = 0;
             foreach (DataGridViewRow row in MatchRegime.Rows)
             {
                 if (row.IsNewRow) continue;
 
-                if (string.IsNullOrEmpty(row.Cells[(int)RegimeColumns.Home].Value?.ToString() ?? "") ||
-                    string.IsNullOrEmpty(row.Cells[(int)RegimeColumns.Guest].Value?.ToString() ?? "")
+                if (string.IsNullOrEmpty(row.Cells[(int) RegimeColumns.Home].Value?.ToString() ?? "") ||
+                    string.IsNullOrEmpty(row.Cells[(int) RegimeColumns.Guest].Value?.ToString() ?? "")
                 )
                     continue;
 
-                for (int i = 4; i <= 6; i++)
+                for (var i = 4; i <= 6; i++)
                 {
                     checks++;
                     var curString = row.Cells[i].Value?.ToString() ?? "";
@@ -668,15 +674,14 @@ namespace Referee.UI
                 }
             }
 
-            if(showMessages)
+            if (showMessages)
                 MessageBox.Show(errors == 0
-                ? $"ΟΛΑ ΟΚ\n\nΕΓΙΝΑΝ ({checks}) ΕΛΕΓΧΟΙ ΣΤΟΝ ΣΤΟΝ ΠΙΝΑΚΑ ΑΝΑΘΕΣΕΩΝ ΧΩΡΙΣ ΚΑΜΙΑ ΣΥΓΚΡΟΥΣΗ ΔΕΔΟΜΕΝΩΝ."
-                : $"\n\nΕΓΙΝΑΝ ({checks}) ΕΛΕΓΧΟΙ ΣΤΟΝ ΣΤΟΝ ΠΙΝΑΚΑ ΑΝΑΘΕΣΕΩΝ ΚΑΙ ΒΡΕΘΗΚΑΝ ({errors}) ΣΥΓΚΡΟΥΣΕΙΣ.");
+                    ? $"ΟΛΑ ΟΚ\n\nΕΓΙΝΑΝ ({checks}) ΕΛΕΓΧΟΙ ΣΤΟΝ ΣΤΟΝ ΠΙΝΑΚΑ ΑΝΑΘΕΣΕΩΝ ΧΩΡΙΣ ΚΑΜΙΑ ΣΥΓΚΡΟΥΣΗ ΔΕΔΟΜΕΝΩΝ."
+                    : $"\n\nΕΓΙΝΑΝ ({checks}) ΕΛΕΓΧΟΙ ΣΤΟΝ ΣΤΟΝ ΠΙΝΑΚΑ ΑΝΑΘΕΣΕΩΝ ΚΑΙ ΒΡΕΘΗΚΑΝ ({errors}) ΣΥΓΚΡΟΥΣΕΙΣ.");
         }
 
         private void colorTimer_Tick(object sender, EventArgs e)
         {
-
         }
     }
 
@@ -690,6 +695,5 @@ namespace Referee.UI
         RefhelpA = 5,
         RefhelpB = 6,
         Refwatch = 7
-
     }
 }

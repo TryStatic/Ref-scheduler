@@ -11,15 +11,15 @@ namespace Referee.UI
         public EditRefWatch()
         {
             InitializeComponent();
-            this.CenterToParent();
+            CenterToParent();
         }
 
         private void btnReturnToEntryPoint_Click(object sender, EventArgs e)
         {
-            this.Hide();
-            ApplicationEntryPoint aep = new ApplicationEntryPoint();
+            Hide();
+            var aep = new ApplicationEntryPoint();
             aep.ShowDialog();
-            this.Close();
+            Close();
         }
 
         private void EditRefWatch_Load(object sender, EventArgs e)
@@ -32,7 +32,7 @@ namespace Referee.UI
             WatchRefData.Rows.Clear();
             foreach (var watchref in ApplicationData.WatchRefs)
             {
-                var row = (DataGridViewRow)WatchRefData.Rows[0].Clone();
+                var row = (DataGridViewRow) WatchRefData.Rows[0].Clone();
                 row.Cells[0].Value = watchref.name;
                 WatchRefData.Rows.Add(row);
             }
@@ -56,7 +56,7 @@ namespace Referee.UI
                 where !row.IsNewRow
                 select row.Cells[0].Value.ToString()
                 into watchRefNewName
-                select new WatchRef { name = watchRefNewName }).ToList();
+                select new WatchRef {name = watchRefNewName}).ToList();
 
             ApplicationData.WatchRefs.Clear();
 

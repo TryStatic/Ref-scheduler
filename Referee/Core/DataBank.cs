@@ -4,6 +4,15 @@ namespace Referee.Core
 {
     public class DataBank
     {
+        public DataBank()
+        {
+            Teams = new List<Team>();
+            Fields = new List<Field>();
+            Refs = new List<Referee>();
+            WatchRefs = new List<WatchRef>();
+            Periods = new List<Period>();
+        }
+
         public List<Team> Teams { get; }
         public List<Field> Fields { get; }
         public List<Referee> Refs { get; }
@@ -13,26 +22,24 @@ namespace Referee.Core
         public Period GetLastPeriod(Period currP)
         {
             foreach (var p in Periods)
-            {
-                if (p.agwnistiki == currP.agwnistiki - 1 && p.periodos == currP.periodos && p.diorganwsi == currP.diorganwsi)
+                if (p.agwnistiki == currP.agwnistiki - 1 && p.periodos == currP.periodos &&
+                    p.diorganwsi == currP.diorganwsi)
                     return p;
-            }
             return null;
         }
 
         public Period GetSecondToLastPeriod(Period currP)
         {
             foreach (var p in Periods)
-            {
-                if (p.agwnistiki == currP.agwnistiki - 2 && p.periodos == currP.periodos && p.diorganwsi == currP.diorganwsi)
+                if (p.agwnistiki == currP.agwnistiki - 2 && p.periodos == currP.periodos &&
+                    p.diorganwsi == currP.diorganwsi)
                     return p;
-            }
             return null;
         }
 
         public void AddPeriod(Period p)
         {
-            if(!Periods.Contains(p))
+            if (!Periods.Contains(p))
                 Periods.Add(p);
         }
 
@@ -50,7 +57,7 @@ namespace Referee.Core
 
         public void AddField(Field f)
         {
-            if(!Fields.Contains(f))
+            if (!Fields.Contains(f))
                 Fields.Add(f);
         }
 
@@ -68,10 +75,7 @@ namespace Referee.Core
 
         public void RemoveRef(Referee r)
         {
-            if (Refs.Contains(r))
-            {
-                Refs.Remove(r);
-            }
+            if (Refs.Contains(r)) Refs.Remove(r);
         }
 
         public void AddWatchRef(WatchRef wr)
@@ -82,20 +86,7 @@ namespace Referee.Core
 
         public void RemoveWatchRef(WatchRef wr)
         {
-            if (WatchRefs.Contains(wr))
-            {
-                WatchRefs.Remove(wr);
-            }
-        }
-
-
-        public DataBank()
-        {
-            Teams = new List<Team>();
-            Fields = new List<Field>();
-            Refs = new List<Referee>();
-            WatchRefs = new List<WatchRef>();
-            Periods = new List<Period>();
+            if (WatchRefs.Contains(wr)) WatchRefs.Remove(wr);
         }
 
         public bool SaveData()

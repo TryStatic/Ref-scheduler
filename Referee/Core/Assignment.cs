@@ -1,21 +1,19 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 
 namespace Referee.Core
 {
     public class Assignment
     {
-        public Period period;
-        public Team home;
-        public Team guest;
         public Field field;
-        public string time;
-        public Referee referee;
+        public Team guest;
         public Referee helperA;
         public Referee helperB;
+        public Team home;
+        public Period period;
+        public Referee referee;
+        public string time;
         public WatchRef watchRef;
 
-        
 
         public override bool Equals(object obj)
         {
