@@ -107,8 +107,8 @@ namespace Referee.UI
             this.cbAgonistikiPeriodos.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
             this.cbAgonistikiPeriodos.FormattingEnabled = true;
             this.cbAgonistikiPeriodos.Items.AddRange(new object[] {
-            "2018-19",
-            "2019-20"});
+            "2020-21",
+            "2021-22"});
             this.cbAgonistikiPeriodos.Location = new System.Drawing.Point(302, 44);
             this.cbAgonistikiPeriodos.Name = "cbAgonistikiPeriodos";
             this.cbAgonistikiPeriodos.Size = new System.Drawing.Size(72, 21);
